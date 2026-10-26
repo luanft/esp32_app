@@ -44,6 +44,7 @@ function SystemCard({ info }) {
   const heapUsed = info.heapTotal - info.heapFree;
   const rows = [
     ['Chip', `${info.chip} rev ${info.revision} @ ${info.cpuMhz} MHz`],
+    ['Temperature', typeof info.tempC === 'number' ? `${info.tempC.toFixed(1)} °C` : '—'],
     ['IP', info.ip],
     ['Wi-Fi', `${info.ssid} (${info.rssi} dBm)`],
     ['Uptime', formatUptime(info.uptime)],
