@@ -17,12 +17,17 @@ const find = (dir, ext) => {
 fs.copyFileSync(find('js', '.js'), path.join(buildDir, 'app.js'));
 fs.copyFileSync(find('css', '.css'), path.join(buildDir, 'app.css'));
 
-const html = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">` +
-  `<meta name="viewport" content="width=device-width,initial-scale=1">` +
-  `<title>ESP32 Task Manager</title>` +
-  `<link rel="stylesheet" href="${base}/app.css">` +
-  `<script defer src="${base}/app.js"></script></head>` +
-  `<body><noscript>You need to enable JavaScript.</noscript><div id="root"></div></body></html>`;
+// Start from CRA's own build/index.html and point its resources at the CDN
+// copies with stable names (keeps meta tags etc. in sync with public/index.html).
+const html = fs
+  .readFileSync(path.join(buildDir, 'index.html'), 'utf8')
+  .replace(/(src|href)="[^"]*\/static\/js\/main\.[^"]+\.js"/, `$1="${base}/app.js"`)
+  .replace(/(src|href)="[^"]*\/static\/css\/main\.[^"]+\.css"/, `$1="${base}/app.css"`)
+  .replace(/>\s+</g, '><')
+  .trim();
+if (!html.includes(`${base}/app.js`) || !html.includes(`${base}/app.css`)) {
+  throw new Error('failed to rewrite resource paths in build/index.html');
+}
 
 fs.writeFileSync(path.join(buildDir, 'esp32-index.html'), html);
 
